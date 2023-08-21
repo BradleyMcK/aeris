@@ -1,5 +1,7 @@
 package com.aeris.demo.controller;
 
+import com.aeris.demo.service.CdfService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,13 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class CdfController {
 
+    @Autowired
+    private CdfService cdfService;
+
     /**
         get-info, returns the NetCDF detailed information.
     */
 
     @GetMapping("/get-info")
     public String getInfo() {
-        return "get-info";
+        return cdfService.getInfo();
     }
 
     /**
