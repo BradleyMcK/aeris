@@ -1,5 +1,6 @@
 package com.aeris.demo.controller;
 
+import com.aeris.demo.model.ConcentrationGrid;
 import com.aeris.demo.service.CdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,8 @@ public class CdfController {
     */
 
     @GetMapping("/get-data")
-    public String getData(@RequestParam String timeIndex, @RequestParam String zIndex) {
-        return "get-data";
+    public ConcentrationGrid getData(@RequestParam Integer tIndex, @RequestParam Integer zIndex) {
+        return cdfService.getData(tIndex, zIndex);
     }
 
     /**
