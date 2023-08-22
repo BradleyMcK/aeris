@@ -1,29 +1,35 @@
 package com.aeris.demo.model;
 
-import ucar.nc2.NetcdfFile;
+public record ConcentrationGrid(double time, double z, ConcentrationRow[] rows) {
 
-public class ConcentrationGrid {
+    public static class ConcentrationRow {
 
-    private final double time;
-    private final double z;
-    private final ConcentrationRow[] rows;
+        private final double y;
+        private final double[] x;
+        private final double[] concentrations;
 
-    public ConcentrationGrid(NetcdfFile cdf, int timeIndex, int zIndex) {
-        ConcentrationIterator iter = new ConcentrationIterator(cdf, timeIndex, zIndex);
-        this.time = iter.getTime();
-        this.z = iter.getZ();
-        this.rows = iter.getConcentrationRows();
+        public ConcentrationRow(double y, int xSize) {
+            this.y = y;
+            this.x = new double[xSize];
+            this.concentrations = new double[xSize];
+        }
+
+        public void addConcentration(int index, double x, double c) {
+            this.x[index] = x;
+            this.concentrations[index] = c;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public double[] getX() {
+            return x;
+        }
+
+        public double[] getConcentrations() {
+            return concentrations;
+        }
     }
 
-    public double getTime() {
-        return time;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
-    public ConcentrationRow[] getRows() {
-        return rows;
-    }
 }

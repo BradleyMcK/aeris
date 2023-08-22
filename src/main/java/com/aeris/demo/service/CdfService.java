@@ -4,17 +4,20 @@ import com.aeris.demo.model.ConcentrationGrid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.core.io.ClassPathResource;
+
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 @Service
 public class CdfService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CdfService.class);
-    private static final String CDF_FILENAME = "static/concentration.timeseries.nc";
+    private static final String CDF_FILENAME = "concentration.timeseries.nc";
 
     private final URL cdfUrl;
 
@@ -23,9 +26,11 @@ public class CdfService {
     }
 
     public CdfService(String cdfFilename) {
-        cdfUrl = ClassLoader.getSystemResource(cdfFilename);
-        if (cdfUrl == null) {
-            String errMsg = String.format("Could not locate file %s", CDF_FILENAME);
+
+        try {
+            cdfUrl = (new ClassPathResource(cdfFilename)).getURL();
+        } catch (IOException e) {
+            String errMsg = String.format("Could not locate file %s", cdfFilename);
             throw new IllegalArgumentException(errMsg);
         }
     }
@@ -46,26 +51,23 @@ public class CdfService {
     public ConcentrationGrid getData(Integer timeIndex, Integer zIndex) {
 
         try (NetcdfFile cdf = NetcdfFiles.open(cdfUrl.getPath())) {
-            /*
-            ConcentrationIterator ci = new ConcentrationIterator(cdf, timeIndex, zIndex);
-            var tVal = ci.getTime();
-            var zVal = ci.getZ();
-            while (ci.hasNext()) {
-                var concentration = ci.next();
-                var cVal = concentration.getC();
-                var yVal = concentration.getY();
-                var xVal = concentration.getX();
-                System.out.println(String.format("{ time=%f z=%f y=%f x=%f c=%e }", tVal, zVal, yVal, xVal, cVal));
-            }
-            */
-
-            return new ConcentrationGrid(cdf, timeIndex, zIndex);
+            ConcentrationData cd = new ConcentrationData(cdf, timeIndex, zIndex);
+            return cd.getConcentrationGrid();
         } catch (Exception e) {
-            LOGGER.error("Error opening CDF file", e);
+            LOGGER.error("Error getting concentration data from CDF file", e);
             throw new RuntimeException(e);
         }
     }
 
-}
+    public InputStream getImageStream(Integer timeIndex, Integer zIndex) {
 
+        try (NetcdfFile cdf = NetcdfFiles.open(cdfUrl.getPath())) {
+            ConcentrationData cd = new ConcentrationData(cdf, timeIndex, zIndex);
+            return cd.getImage();
+        } catch (Exception e) {
+            LOGGER.error("Error creating image from concentration data", e);
+            throw new RuntimeException(e);
+        }
+    }
+}
 
